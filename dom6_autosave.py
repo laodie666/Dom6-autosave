@@ -40,10 +40,10 @@ def get_turn_number(filepath):
 
 # save game turn
 def save_turn(game_index):
-    
+    game_name = game_save_list[game_index][0]
     src_path = game_save_list[game_index][1]
     dst_path = os.path.join(backup_path, game_save_list[game_index][0])
-    print(f"Saving {src_path}")
+    print(f"Saving {game_name}")
     
     # First find the directory for the game in backup folder, create if doesn't exist
     if not os.path.exists(dst_path):
@@ -80,7 +80,7 @@ def save_turn(game_index):
     
     if not user_input.isdigit():
         print("Please input an interger")
-        
+        return
         
     user_input = int(user_input)
     if user_input == 1:    
@@ -110,7 +110,7 @@ def load_turn(game_index):
     src_path = game_backup_list[game_index][1] 
     dst_path = os.path.join(game_save_path, game_name)
     
-    print(f"Loading {game_index}")
+    print(f"Loading {game_name}")
     # Ask for save to load, print all the ones available
     saves = []
     for name in os.listdir(src_path):
@@ -123,6 +123,7 @@ def load_turn(game_index):
     user_input = input("Select save to load: ")
     if not user_input.isdigit():
         print("Please input an interger")
+        return
     
     user_input = int(user_input)
     
@@ -147,61 +148,130 @@ def load_turn(game_index):
     
     return
 
+def delete_backup_save(game_index):
+    src_path = game_backup_list[game_index][1]
+    saves = []
+    for name in os.listdir(src_path):
+        if os.path.isdir(os.path.join(src_path, name)):
+            saves.append(name)
+    
+    for i in range(len(saves)):
+        print(i, saves[i])
+    
+    user_input = input("Select save to delete: ")
+    if not user_input.isdigit():
+        print("Please input an interger")
+        return
+    
+    user_input = int(user_input)
+    shutil.rmtree(os.path.join(src_path, saves[user_input]))
+    
+    has_save = False
+    for name in os.listdir(src_path):
+        if os.path.isdir(os.path.join(src_path, name)):
+            has_save = True
+            return
+    
+    if not has_save:
+        shutil.rmtree(src_path)
 
 if __name__ == "__main__":
-    print("autosave is now running")
 
     if not os.path.exists(backup_path):
         os.makedirs(backup_path)
     
-    # Title
-    print(r"""
-________                   ________   _________                         
-\______ \   ____   _____  /  _____/  /   _____/____ ___  __ ___________ 
- |    |  \ /  _ \ /     \/   __  \   \_____  \\__  \\  \/ // __ \_  __ \
- |_   `   (  <_> )  Y Y  \  |__\  \  /        \/ __ \\   /\  ___/|  | \/
-/_______  /\____/|__|_|  /\_____  / /_______  (____  /\_/  \___  >__|   
-        \/             \/       \/          \/     \/          \/                                                                                   
-                                                                                                                                                         
-            """)    
+     
     
-    # TODO while() until break
+    while True:
     
-    # TODO uncomment Save sequence
-    # game_list = get_save_dirs()
-    # for i in range(len(game_list)):
-    #     print(i, game_list[i][0])
-       
-    # user_input = input("Select game to save: ")
-    # if not user_input.isdigit():
-    #     print("Please input an interger")
-    #     # TODO uncomment continue
+        # Title
+        print(r"""
+    ________                   ________   _________                         
+    \______ \   ____   _____  /  _____/  /   _____/____ ___  __ ___________ 
+    |    |  \ /  _ \ /     \/   __  \   \_____  \\__  \\  \/ // __ \_  __ \
+    |_   `   (  <_> )  Y Y  \  |__\  \  /        \/ __ \\   /\  ___/|  | \/
+    /_______  /\____/|__|_|  /\_____  / /_______  (____  /\_/  \___  >__|   
+            \/             \/       \/          \/     \/          \/                                                                                   
+                                                                                                                                                            
+                """)   
         
-    # user_input = int(user_input)
-    # if user_input not in range(0, len(game_list)):
-    #     print("No such game")
-    # save_turn(user_input)
-    
-    # TODO Load Sequence
-    game_backup_list = get_backup_dirs()
-    for i in range(len(game_backup_list)):
-        print(i, game_backup_list[i][0])
-       
-    user_input = input("Select game to load: ")
-    if not user_input.isdigit():
-        print("Please input an interger")
-        # TODO uncomment continue
+        game_list = get_save_dirs()
+        game_backup_list = get_backup_dirs()
+
+        print("0 Create backup save")
+        print("1 Load backup save")
+        print("2 Delete backup save")
+        print("3 Exit")
         
-    user_input = int(user_input)
-    if user_input not in range(0, len(game_backup_list)):
-        print("No such game")
-    load_turn(user_input)
-    
-    
-    # TODO Delete Save Sequence
-    
-       
-    # TODO Need clear console at end of loop 
+        user_input = input("Select option: ")
+        print("--------------------------------")
+        if not user_input.isdigit():
+            print("Please input an interger")
+            continue
+        
+        user_input = int(user_input)
+        if user_input not in range(0, 4):
+            print("invalid input")
+            continue
+        
+        #Save sequence
+        
+        if user_input == 0:
+            for i in range(len(game_list)):
+                print(i, game_list[i][0])
+            
+            user_input = input("Select game to save: ")
+            if not user_input.isdigit():
+                print("Please input an interger")
+                continue
+                
+            user_input = int(user_input)
+            if user_input not in range(0, len(game_list)):
+                print("No such game")
+                continue
+            
+            save_turn(user_input)
+        
+        # Load Sequence
+        elif user_input == 1:
+            for i in range(len(game_backup_list)):
+                print(i, game_backup_list[i][0])
+            
+            user_input = input("Select game to load: ")
+            if not user_input.isdigit():
+                print("Please input an interger")
+                continue
+                
+            user_input = int(user_input)
+            if user_input not in range(0, len(game_backup_list)):
+                print("No such game")
+                continue
+
+            load_turn(user_input)
+        
+        
+        # Delete Save Sequence
+        elif user_input == 2:
+            game_backup_list = get_backup_dirs()
+            for i in range(len(game_backup_list)):
+                print(i, game_backup_list[i][0])
+            
+            user_input = input("Select game to delete backup save for: ")
+            if not user_input.isdigit():
+                print("Please input an interger")
+                continue
+                
+            user_input = int(user_input)
+            if user_input not in range(0, len(game_backup_list)):
+                print("No such game")
+                continue
+            
+            delete_backup_save(user_input)
+        
+        else: 
+            exit()
+        
+        
     
     
     # TODO 
