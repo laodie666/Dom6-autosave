@@ -11,6 +11,13 @@ Presumably, it saves tons of time when testing battles or doing save scumming in
 - Autosaving support  
   - Leave the script open while you play with autosaving turned on and it will automatically back up new turns coming in. 
 
+## How to run
+
+- Download the exe by clicking the releases on the right and download the exe or just click Code and download zip.
+- Double click the exe, and it should just work 👍
+<img width="1067" height="774" alt="image" src="https://github.com/user-attachments/assets/a3b8766c-f114-4c35-9fb1-fd248aaeb1ec" />
+
+
 ## Notes
 
 - This has not been extensively tested yet!!!!
