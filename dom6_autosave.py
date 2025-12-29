@@ -6,11 +6,13 @@ import fnmatch
 import sys
 import time
 import logging
+import watchdog
+from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
-from watchdog.events import LoggingEventHandler
 
 game_save_path = os.path.expandvars(r"%AppData%\Dominions6\savedgames")
 backup_path = os.path.expandvars(r"%AppData%\Dom6_autosave\backup")
+            
 
 # return tuple of name of dir and its path
 def get_save_dirs():
@@ -45,8 +47,7 @@ def save_turn(game_index):
     
     if not os.path.exists(dst_path):
         os.makedirs(dst_path)
-    
-    shutil.copytree(src_path, dst_path, ignore=shutil.ignore_patterns('*.trn', '*.2h'), dirs_exist_ok=True)
+        shutil.copytree(src_path, dst_path, ignore=shutil.ignore_patterns('*.trn', '*.2h'), dirs_exist_ok=True)
     
     turn_number = -1
     
@@ -92,6 +93,41 @@ def save_turn(game_index):
                          os.path.join(save_path, name))
     return
 
+class AutoSaveEventHandler (FileSystemEventHandler):
+    def on_modified(self, event):
+        if event.src_path.endswith('.trn'):
+            # incase trying to read a file being written to
+            time.sleep(2) 
+            
+            src_path = os.path.dirname(event.src_path)
+            game_name = os.path.basename(os.path.normpath(src_path))
+            dst_path = os.path.join(backup_path, game_name)
+            
+            if not os.path.exists(dst_path):
+                os.makedirs(dst_path)
+                shutil.copytree(src_path, dst_path, ignore=shutil.ignore_patterns('*.trn', '*.2h'), dirs_exist_ok=True)
+            
+            turn_number = -1
+            
+            for file in os.listdir(src_path):
+                if file.endswith('.trn'):
+                    turn_number = get_turn_number(os.path.join(src_path, file))
+                    break
+            
+            if turn_number == -1:
+                print("\nFailed to read turn number from .trn file\n")
+                return
+              
+            save_name = f"turn_{turn_number}"
+            save_path = os.path.join(dst_path, save_name)
+            if save_name not in os.listdir(dst_path):
+                os.makedirs(save_path)
+                
+                for name in os.listdir(src_path):
+                    if name.endswith('.trn') or name.endswith('.2h'):
+                        shutil.copy2(os.path.join(src_path, name),
+                                    os.path.join(save_path, name))
+            return
 
 # load game turn
 def load_turn(game_index):
@@ -169,10 +205,15 @@ def delete_backup_save(game_index):
         shutil.rmtree(src_path)
 
 
+
 if __name__ == "__main__":
 
     if not os.path.exists(backup_path):
         os.makedirs(backup_path)
+    
+    autosaving = False
+    
+    observer = None
     
     while True:
     
@@ -185,6 +226,8 @@ if __name__ == "__main__":
             \/             \/       \/          \/     \/          \/                                                                                   
                 """)   
         
+        
+        
         game_list = get_save_dirs()
         game_backup_list = get_backup_dirs()
 
@@ -192,9 +235,14 @@ if __name__ == "__main__":
         print("0 Create backup")
         print("1 Load backup")
         print("2 Delete backup")
-        print("3 Exit\n")
+        if not autosaving:
+            print("3 Enable autosaving")
+        else:
+            print("3 Disable autosaving")
+
+        print("4 Exit\n")
         
-        user_input = input("Select option (0–3): ")
+        user_input = input("Select option (0–4): ")
         print("\n--------------------------------\n")
         
         if not user_input.isdigit():
@@ -263,6 +311,29 @@ if __name__ == "__main__":
                 continue
             
             delete_backup_save(user_input)
-        
+        elif user_input == 3:
+            if not autosaving:
+                print("Autosaving enabled")
+                print()
+                autosaving = True
+                event_handler = AutoSaveEventHandler()
+                observer = Observer()
+                observer.schedule(event_handler, game_save_path, recursive=True)
+                observer.start()
+            else:
+                print("Autosaving disabled")
+                print()
+                autosaving = False
+                observer.stop()
+                observer.join()
+                observer = None
         else:
+            observer.stop()
+            observer.join()
             exit()
+
+        
+
+
+
+        
