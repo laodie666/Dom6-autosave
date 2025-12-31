@@ -90,7 +90,7 @@ def save_turn(game_index):
     os.makedirs(save_path)
 
     for name in os.listdir(src_path):
-        if name.endswith('.trn') or name.endswith('.2h'):
+        if name.endswith('.trn') or name.endswith('.2h') or name == 'ftherlnd':
             shutil.copy2(
                 os.path.join(src_path, name),
                 os.path.join(save_path, name)
@@ -133,7 +133,7 @@ class AutoSaveEventHandler(FileSystemEventHandler):
         if save_name not in os.listdir(dst_path):
             os.makedirs(save_path)
             for name in os.listdir(src_path):
-                if name.endswith('.trn') or name.endswith('.2h'):
+                if name.endswith('.trn') or name.endswith('.2h') or name == 'ftherlnd':
                     shutil.copy2(
                         os.path.join(src_path, name),
                         os.path.join(save_path, name)
@@ -200,6 +200,7 @@ def delete_backup_save(game_index):
     for i in range(len(saves)):
         print(i, saves[i])
     print(len(saves), "Back")
+    print(len(saves) + 1, "Delete Entire Game Folder")
 
     print()
     user_input = input("Select backup to delete: ")
@@ -210,8 +211,14 @@ def delete_backup_save(game_index):
         return
 
     user_input = int(user_input)
+    
     if user_input == len(saves):
         return
+        
+    if user_input == len(saves) + 1:
+        shutil.rmtree(src_path)
+        return
+
     if user_input not in range(len(saves)):
         print("Invalid selection\n")
         return
