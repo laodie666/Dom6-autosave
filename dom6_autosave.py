@@ -199,9 +199,10 @@ def delete_backup_save(game_index):
 
     for i in range(len(saves)):
         print(i, saves[i])
-    print(len(saves), "Back")
-    print(len(saves) + 1, "Delete Entire Game Folder")
-
+    
+    print(len(saves), "Delete Entire Game Folder")
+    print(len(saves) + 1, "Back")
+    
     print()
     user_input = input("Select backup to delete: ")
     print()
@@ -211,14 +212,14 @@ def delete_backup_save(game_index):
         return
 
     user_input = int(user_input)
-    
+
     if user_input == len(saves):
-        return
-        
-    if user_input == len(saves) + 1:
         shutil.rmtree(src_path)
         return
-
+    
+    if user_input == len(saves) + 1:
+        return
+    
     if user_input not in range(len(saves)):
         print("Invalid selection\n")
         return
