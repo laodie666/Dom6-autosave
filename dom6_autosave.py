@@ -42,12 +42,13 @@ def save_turn(game_index):
 
     if not os.path.exists(dst_path):
         os.makedirs(dst_path)
-        shutil.copytree(
-            src_path,
-            dst_path,
-            ignore=shutil.ignore_patterns('*.trn', '*.2h'),
-            dirs_exist_ok=True
-        )
+
+    shutil.copytree(
+        src_path,
+        dst_path,
+        ignore=shutil.ignore_patterns('*.trn', '*.2h'),
+        dirs_exist_ok=True
+    )
 
     turn_number = -1
     for file in os.listdir(src_path):
@@ -109,12 +110,13 @@ class AutoSaveEventHandler(FileSystemEventHandler):
 
         if not os.path.exists(dst_path):
             os.makedirs(dst_path)
-            shutil.copytree(
-                src_path,
-                dst_path,
-                ignore=shutil.ignore_patterns('*.trn', '*.2h'),
-                dirs_exist_ok=True
-            )
+
+        shutil.copytree(
+            src_path,
+            dst_path,
+            ignore=shutil.ignore_patterns('*.trn', '*.2h'),
+            dirs_exist_ok=True
+        )
 
         turn_number = -1
         for file in os.listdir(src_path):
