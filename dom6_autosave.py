@@ -9,6 +9,11 @@ game_save_path = os.path.expandvars(r"%AppData%\Dominions6\savedgames")
 backup_path = os.path.expandvars(r"%AppData%\Dom6_autosave\backup")
 
 
+if os.name == "posix":
+    game_save_path = os.path.expanduser("~/.dominions6/savedgames")
+    backup_path = os.path.expanduser("~/.dominions6/backup")
+
+
 def get_save_dirs():
     content = os.listdir(game_save_path)
     return [(name, os.path.join(game_save_path, name))
@@ -99,7 +104,8 @@ def save_turn(game_index):
 
 class AutoSaveEventHandler(FileSystemEventHandler):
     def on_modified(self, event):
-        if not event.src_path.endswith('.trn'):
+        if not (event.src_path.endswith('.trn') or event.src_path.endswith('.2h')):
+            print("not saved"+ event.src_path)
             return
 
         time.sleep(2)
@@ -132,12 +138,13 @@ class AutoSaveEventHandler(FileSystemEventHandler):
 
         if save_name not in os.listdir(dst_path):
             os.makedirs(save_path)
-            for name in os.listdir(src_path):
-                if name.endswith('.trn') or name.endswith('.2h') or name == 'ftherlnd':
-                    shutil.copy2(
-                        os.path.join(src_path, name),
-                        os.path.join(save_path, name)
-                    )
+        for name in os.listdir(src_path):
+            if name.endswith('.trn') or name.endswith('.2h') or name == 'ftherlnd':
+                shutil.copy2(
+                    os.path.join(src_path, name),
+                    os.path.join(save_path, name)
+                )
+        print("saved turn: "+game_name+save_name)
 
 
 def load_turn(game_index):
